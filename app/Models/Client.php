@@ -12,13 +12,13 @@ class Client extends Model
 {
     use HasFactory, HasUuids;
 
-    protected array $fillable = ['name', 'email', 'phone', 'document_identification', 'status'];
+    protected $fillable = ['name', 'email', 'phone', 'document_identification', 'status'];
 
-    protected array $attributes = [
+    protected $attributes = [
         'status' => Status::Active,
     ];
 
-    protected array $casts = [
+    protected $casts = [
         'status' => Status::class,
     ];
 

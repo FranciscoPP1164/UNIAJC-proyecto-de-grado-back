@@ -12,7 +12,7 @@ class Patient extends Model
 {
     use HasFactory, HasUuids;
 
-    protected array $fillable = ['name', 'age', 'direction', 'document_identification'];
+    protected $fillable = ['name', 'age', 'direction', 'document_identification'];
 
     public function conditions(): HasMany
     {

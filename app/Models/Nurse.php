@@ -13,13 +13,13 @@ class Nurse extends Model
 {
     use HasFactory, HasUuids;
 
-    protected array $fillable = ['name', 'genre', 'email', 'phone', 'document_identification', 'status'];
+    protected $fillable = ['name', 'genre', 'email', 'phone', 'document_identification', 'status'];
 
-    protected array $attributes = [
+    protected $attributes = [
         'status' => Status::Active,
     ];
 
-    protected array $casts = [
+    protected $casts = [
         'genre' => Genre::class,
         'status' => Status::class,
     ];

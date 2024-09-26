@@ -11,7 +11,7 @@ class Condition extends Model
 {
     use HasFactory, HasUuids;
 
-    protected array $fillable = ['description'];
+    protected $fillable = ['description'];
 
     public function patient(): BelongsTo
     {

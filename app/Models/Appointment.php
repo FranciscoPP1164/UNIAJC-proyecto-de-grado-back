@@ -13,13 +13,13 @@ class Appointment extends Model
 {
     use HasFactory, HasUuids;
 
-    protected array $fillable = ['tittle', 'description', 'color', 'text_color', 'start_datetime', 'end_datetime', 'status'];
+    protected $fillable = ['tittle', 'description', 'color', 'text_color', 'start_datetime', 'end_datetime', 'status'];
 
-    protected array $attributes = [
+    protected $attributes = [
         'status' => AppointmentStatus::Pending,
     ];
 
-    protected array $casts = [
+    protected $casts = [
         'start_datetime' => 'datetime',
         'end_datetime' => 'datetime',
         'status' => AppointmentStatus::class,
