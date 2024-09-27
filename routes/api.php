@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ConditionController;
 use App\Http\Controllers\NurseController;
 use App\Http\Controllers\PatientController;
@@ -16,6 +17,9 @@ Route::name('auth.')->prefix('/auth')->controller(AuthController::class)->group(
 
 Route::softDeletes('nurses', NurseController::class);
 Route::apiResource('nurses', NurseController::class);
+
+Route::softDeletes('clients', ClientController::class);
+Route::apiResource('clients', ClientController::class);
 
 Route::softDeletes('patients', PatientController::class);
 Route::apiResource('patients', PatientController::class);

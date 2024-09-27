@@ -85,7 +85,7 @@ class PatientController extends Controller
         return response()->json($patient);
     }
 
-    public function deletePermanently(Patient $patient): JsonResponse
+    public function destroyPermanently(Patient $patient): JsonResponse
     {
         if (!$patient->trashed()) {
             return response()->json(null, 406);

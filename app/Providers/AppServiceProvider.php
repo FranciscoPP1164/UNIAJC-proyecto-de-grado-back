@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
 
             Route::name("{$name}.")->prefix("/{$name}/{{$singularName}}")->controller($controller)->group(function () {
                 Route::post('/restore', 'restore')->withTrashed()->name('restore');
-                Route::delete('/permanently', 'deletePermanently')->withTrashed()->name('delete.permanently');
+                Route::delete('/permanently', 'destroyPermanently')->withTrashed()->name('destroy.permanently');
             });
 
         });

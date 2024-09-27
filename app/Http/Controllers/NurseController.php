@@ -92,7 +92,7 @@ class NurseController extends Controller
         return response()->json($nurse);
     }
 
-    public function deletePermanently(Nurse $nurse): JsonResponse
+    public function destroyPermanently(Nurse $nurse): JsonResponse
     {
         if (!$nurse->trashed()) {
             return response()->json(null, 406);
