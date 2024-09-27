@@ -17,6 +17,7 @@ return new class extends Migration
             $table->tinyInteger('age');
             $table->string('direction');
             $table->string('document_identification')->unique();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

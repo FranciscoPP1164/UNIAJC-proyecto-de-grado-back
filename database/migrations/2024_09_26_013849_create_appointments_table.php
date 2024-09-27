@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('text_color', 7);
             $table->dateTime('start_datetime');
             $table->dateTime('end_datetime');
-            $table->enum('status', ['pending', 'started', 'ended'])->default('pending');
+            $table->enum('status', ['pending', 'started', 'canceled', 'ended'])->default('pending');
             $table->foreignUuid('client_id')->constrained();
             $table->timestamps();
         });

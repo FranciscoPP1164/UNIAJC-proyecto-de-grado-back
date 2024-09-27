@@ -2,64 +2,102 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Genre;
+use App\Enums\Status;
 use App\Models\Nurse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class NurseController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request): JsonResponse
     {
-        //
-    }
+        $rowsPerPage = $request->query('rowsPerPage') ?? 10;
+        $nurses = Nurse::simplePaginate($rowsPerPage);
+        $numberOfRows = count($nurses);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return response()->json([
+            'count' => $numberOfRows,
+            'current_page' => $nurses->currentPage(),
+            'data' => $nurses->items(),
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        //
+        $validatedRequestBody = $request->validate([
+            'name' => 'bail|string|required',
+            'genre' => ['bail', 'required', Rule::enum(Genre::class)],
+            'email' => 'bail|email|required',
+            'phone' => 'bail|string|numeric|required',
+            'document_identification' => 'bail|string|numeric|required|unique:nurses',
+            'status' => ['bail', 'nullable', Rule::enum(Status::class)],
+        ]);
+
+        $createdNurse = Nurse::create($validatedRequestBody);
+
+        return response()->json($createdNurse);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Nurse $nurse)
+    public function show(Nurse $nurse): JsonResponse
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Nurse $nurse)
-    {
-        //
+        return response()->json($nurse);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Nurse $nurse)
+    public function update(Request $request, Nurse $nurse): JsonResponse
     {
-        //
+        $validatedRequestBody = $request->validate([
+            'name' => 'bail|string|nullable',
+            'genre' => ['bail', 'nullable', Rule::enum(Genre::class)],
+            'email' => 'bail|email|nullable',
+            'phone' => 'bail|string|numeric|nullable',
+            'document_identification' => 'bail|string|numeric|nullable',
+            'status' => ['bail', 'nullable', Rule::enum(Status::class)],
+        ]);
+
+        $nurse->update($validatedRequestBody);
+        return response()->json($nurse);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Nurse $nurse)
+    public function destroy(Nurse $nurse): JsonResponse
     {
-        //
+        $nurse->delete();
+        return response()->json($nurse);
+    }
+
+    public function restore(Nurse $nurse): JsonResponse
+    {
+        if (!$nurse->trashed()) {
+            return response()->json(null, 406);
+        }
+
+        $nurse->restore();
+        return response()->json($nurse);
+    }
+
+    public function deletePermanently(Nurse $nurse): JsonResponse
+    {
+        if (!$nurse->trashed()) {
+            return response()->json(null, 406);
+        }
+
+        $nurse->delete();
+        return response()->json($nurse);
     }
 }
