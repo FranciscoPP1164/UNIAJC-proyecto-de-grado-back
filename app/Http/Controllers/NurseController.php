@@ -16,13 +16,14 @@ class NurseController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $rowsPerPage = $request->query('rowsPerPage') ?? 10;
+        $rowsPerPage = (int) $request->query('rowsPerPage') ?? 10;
         $nurses = Nurse::simplePaginate($rowsPerPage);
         $numberOfRows = count($nurses);
 
         return response()->json([
-            'count' => $numberOfRows,
             'current_page' => $nurses->currentPage(),
+            'rowsPerPage' => $rowsPerPage,
+            'count' => $numberOfRows,
             'data' => $nurses->items(),
         ]);
     }
@@ -97,7 +98,7 @@ class NurseController extends Controller
             return response()->json(null, 406);
         }
 
-        $nurse->delete();
+        $nurse->forceDelete();
         return response()->json($nurse);
     }
 }
