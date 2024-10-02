@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->enum('type', ['nurse', 'admin']);
             $table->enum('status', ['inactive', 'active'])->default('active');
             $table->rememberToken();
@@ -26,6 +26,13 @@ return new class extends Migration
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
+
+        Schema::create('verification_token', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('token', 6);
+            $table->foreignUuid('user_id')->unique();
             $table->timestamp('created_at')->nullable();
         });
 

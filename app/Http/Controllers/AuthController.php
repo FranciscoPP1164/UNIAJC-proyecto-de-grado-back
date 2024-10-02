@@ -48,6 +48,16 @@ class AuthController extends Controller
         return response()->json($newUser, 201);
     }
 
+    public function requestVerificationToken(User $user)
+    {
+        $verificationToken = $user->renovateVerificationToken();
+    }
+
+    public function register(Request $request, User $user)
+    {
+
+    }
+
     public function logout(Request $request): Response
     {
         $request->user()->currentAccessToken()->delete();
