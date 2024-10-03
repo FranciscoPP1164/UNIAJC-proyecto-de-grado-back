@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
@@ -48,14 +49,24 @@ class AuthController extends Controller
         return response()->json($newUser, 201);
     }
 
-    public function requestVerificationToken(User $user)
+    public function register(Request $request, User $user): Response | JsonResponse
     {
-        $verificationToken = $user->renovateVerificationToken();
-    }
+        $verificationToken = $request->verificationToken;
+        $isVerifiedToken = $user->verifyVerificationToken($verificationToken);
 
-    public function register(Request $request, User $user)
-    {
+        if (!$isVerifiedToken) {
+            return response()->noContent(401);
+        }
 
+        $request->validate([
+            'password' => ['bail', 'string', 'required', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
+            'confirm_password' => ['bail', 'string', 'required', 'same:password'],
+        ]);
+
+        $user->update(['password' => $request->password]);
+        $user->verificationToken()->delete();
+
+        return response()->json($user->withoutRelations());
     }
 
     public function logout(Request $request): Response

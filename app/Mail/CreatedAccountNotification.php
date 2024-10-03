@@ -13,12 +13,14 @@ class CreatedAccountNotification extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public string $verificationToken;
+
     /**
      * Create a new message instance.
      */
     public function __construct(private User $user)
     {
-        //
+        $this->verificationToken = $user->renovateVerificationToken();
     }
 
     /**
@@ -40,6 +42,7 @@ class CreatedAccountNotification extends Mailable
             view: 'emails.created-account-notification',
             with: [
                 'user' => $this->user,
+                'token' => $this->verificationToken,
             ]
         );
     }

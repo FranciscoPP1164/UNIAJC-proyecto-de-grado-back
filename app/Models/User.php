@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Nette\Utils\Random;
 
@@ -59,10 +60,10 @@ class User extends Authenticatable
 
     public function renovateVerificationToken(): string
     {
-        $verificationToken = Random::generate(6);
+        $verificationToken = Random::generate(32);
         $verificationTokenData = ['token' => $verificationToken];
 
-        if ($this->has('verificationToken')) {
+        if ($this->verificationToken) {
             $this->verificationToken->update($verificationTokenData);
         } else {
             $this->verificationToken()->create($verificationTokenData);
@@ -79,10 +80,10 @@ class User extends Authenticatable
             return false;
         }
 
-        return $providedVerificationToken === $verificationToken->token;
+        return Hash::check($providedVerificationToken, $verificationToken->token);
     }
 
-    private function verificationToken(): HasOne
+    public function verificationToken(): HasOne
     {
         return $this->hasOne(VerificationToken::class);
     }

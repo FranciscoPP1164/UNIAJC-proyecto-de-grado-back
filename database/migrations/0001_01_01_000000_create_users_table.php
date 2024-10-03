@@ -29,11 +29,11 @@ return new class extends Migration
             $table->timestamp('created_at')->nullable();
         });
 
-        Schema::create('verification_token', function (Blueprint $table) {
+        Schema::create('verification_tokens', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('token', 6);
-            $table->foreignUuid('user_id')->unique();
-            $table->timestamp('created_at')->nullable();
+            $table->string('token');
+            $table->foreignUuid('user_id')->unique()->constrained()->onDelete('cascade')->onUpdate('cascade');
+            $table->timestamps();
         });
 
         Schema::create('sessions', function (Blueprint $table) {
@@ -51,6 +51,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('verification_tokens');
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');

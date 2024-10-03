@@ -17,4 +17,12 @@ class VerificationToken extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    protected $hidden = [
+        'token',
+    ];
+
+    protected $casts = [
+        'token' => 'hashed',
+    ];
 }

@@ -13,7 +13,6 @@ Route::name('auth.')->prefix('/auth')->controller(AuthController::class)->group(
     Route::withoutMiddleware('auth:sanctum')->group(function () {
         Route::post('/login', 'login')->name('login');
         Route::post('/signup', 'signup')->name('signup');
-        Route::post('/requestVerificationToken/{user}', 'requestVerificationToken')->name('request.verification.token');
         Route::post('/register/{user}', 'register')->name('register');
     });
     Route::post('/logout', 'logout')->name('logout');
