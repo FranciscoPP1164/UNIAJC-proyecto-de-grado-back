@@ -13,8 +13,16 @@ class PatientController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $rowsPerPage = (int) $request->query('rowsPerPage') ?? 10;
-        $patients = Patient::with('conditions')->simplePaginate($rowsPerPage);
+        $rowsPerPage = (int) $request->rowsPerPage ?? 10;
+
+        if ($request->name) {
+            $patients = Patient::whereLike('name', "%$request->name%")->simplePaginate($rowsPerPage);
+        } elseif ($request->documentIdentification) {
+            $patients = Patient::whereLike('document_identification', "%$request->documentIdentification%")->simplePaginate($rowsPerPage);
+        } else {
+            $patients = Patient::simplePaginate($rowsPerPage);
+        }
+
         $numberOfRows = count($patients);
 
         return response()->json([

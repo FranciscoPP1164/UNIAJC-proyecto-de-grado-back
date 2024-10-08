@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ConditionController;
@@ -37,6 +38,8 @@ Route::middleware(IsAdminUserMiddleware::class)->group(function () {
         Route::delete('/{condition}', 'destroy')->name('destroy');
     });
 });
+
+Route::apiResource('appointments', AppointmentController::class);
 
 Route::fallback(function () {
     return response()->noContent(404);

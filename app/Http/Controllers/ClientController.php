@@ -16,7 +16,15 @@ class ClientController extends Controller
     public function index(Request $request): JsonResponse
     {
         $rowsPerPage = (int) $request->query('rowsPerPage') ?? 10;
-        $clients = Client::simplePaginate($rowsPerPage);
+
+        if ($request->name) {
+            $clients = Client::whereLike('name', "%$request->name%")->simplePaginate($rowsPerPage);
+        } elseif ($request->documentIdentification) {
+            $clients = Client::whereLike('document_identification', "%$request->documentIdentification%")->simplePaginate($rowsPerPage);
+        } else {
+            $clients = Client::simplePaginate($rowsPerPage);
+        }
+
         $numberOfRows = count($clients);
 
         return response()->json([
@@ -25,7 +33,6 @@ class ClientController extends Controller
             'count' => $numberOfRows,
             'data' => $clients->items(),
         ]);
-
     }
 
     /**

@@ -15,6 +15,8 @@ class Patient extends Model
 
     protected $fillable = ['name', 'age', 'direction', 'document_identification'];
 
+    protected $hidden = ['pivot'];
+
     public function conditions(): HasMany
     {
         return $this->hasMany(Condition::class);

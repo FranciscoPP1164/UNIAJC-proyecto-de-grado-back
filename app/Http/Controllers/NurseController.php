@@ -17,7 +17,15 @@ class NurseController extends Controller
     public function index(Request $request): JsonResponse
     {
         $rowsPerPage = (int) $request->query('rowsPerPage') ?? 10;
-        $nurses = Nurse::simplePaginate($rowsPerPage);
+
+        if ($request->name) {
+            $nurses = Nurse::whereLike('name', "%$request->name%")->simplePaginate($rowsPerPage);
+        } elseif ($request->documentIdentification) {
+            $nurses = Nurse::whereLike('document_identification', "%$request->documentIdentification%")->simplePaginate($rowsPerPage);
+        } else {
+            $nurses = Nurse::simplePaginate($rowsPerPage);
+        }
+
         $numberOfRows = count($nurses);
 
         return response()->json([

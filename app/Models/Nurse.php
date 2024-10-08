@@ -25,6 +25,8 @@ class Nurse extends Model
         'status' => Status::class,
     ];
 
+    protected $hidden = ['pivot'];
+
     public function appointments(): BelongsToMany
     {
         return $this->belongsToMany(Appointment::class)->using(AppointmentNurse::class);

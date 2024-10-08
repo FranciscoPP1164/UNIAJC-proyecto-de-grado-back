@@ -21,6 +21,7 @@ return new class extends Migration
             $table->dateTime('end_datetime');
             $table->enum('status', ['pending', 'started', 'canceled', 'ended'])->default('pending');
             $table->foreignUuid('client_id')->constrained();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
