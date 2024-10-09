@@ -3,6 +3,7 @@
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ConditionController;
 use App\Http\Controllers\NurseController;
 use App\Http\Controllers\PatientController;
@@ -32,10 +33,8 @@ Route::middleware(IsAdminUserMiddleware::class)->group(function () {
     Route::softDeletes('patients', PatientController::class);
     Route::apiResource('patients', PatientController::class);
 
-    Route::name('patients.conditions.')->prefix('/patients/{patient}/conditions')->controller(ConditionController::class)->scopeBindings()->group(function () {
-        Route::post('/', 'store')->name('store');
-        Route::match(['put', 'patch'], '/{condition}', 'update')->name('update');
-        Route::delete('/{condition}', 'destroy')->name('destroy');
+    Route::name('patients.')->prefix('/patients/{patient}')->scopeBindings()->group(function () {
+        Route::apiResource('conditions', ConditionController::class)->except(['index', 'show']);
     });
 });
 
@@ -45,6 +44,10 @@ Route::name('appointments.')->prefix('/appointments/{appointment}')->controller(
     Route::post('/end', 'end')->name('end');
 });
 Route::apiResource('appointments', AppointmentController::class)->except('destroy');
+
+Route::name('appointments.')->prefix('/appointments/{appointment}')->scopeBindings()->group(function () {
+    Route::apiResource('comments', CommentController::class)->except(['index', 'show']);
+});
 
 Route::fallback(function () {
     return response()->noContent(404);

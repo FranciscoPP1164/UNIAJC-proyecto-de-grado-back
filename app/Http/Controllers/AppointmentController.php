@@ -89,9 +89,9 @@ class AppointmentController extends Controller
             $nursesIDS = $request->nurses_ids;
 
             $query->
-                whereBetween('appointments.start_datetime', [$startDateTime, $endDateTime])->whereIn('nurses.id', $nursesIDS)->
-                orWhereBetween('appointments.end_datetime', [$startDateTime, $endDateTime])->whereIn('nurses.id', $nursesIDS)->
-                orWhere('appointments.start_datetime', '<', $startDateTime)->where('appointments.end_datetime', '>', $endDateTime)->whereIn('nurses.id', $nursesIDS);
+                whereBetween('appointments.start_datetime', [$startDateTime, $endDateTime])->whereNotIn('appointments.status', [AppointmentStatus::Canceled, AppointmentStatus::Ended])->whereIn('nurses.id', $nursesIDS)->
+                orWhereBetween('appointments.end_datetime', [$startDateTime, $endDateTime])->whereNotIn('appointments.status', [AppointmentStatus::Canceled, AppointmentStatus::Ended])->whereIn('nurses.id', $nursesIDS)->
+                orWhere('appointments.start_datetime', '<', $startDateTime)->where('appointments.end_datetime', '>', $endDateTime)->whereNotIn('appointments.status', [AppointmentStatus::Canceled, AppointmentStatus::Ended])->whereIn('nurses.id', $nursesIDS);
         })->exists();
 
         if ($existsShockingAppointments) {
@@ -124,7 +124,7 @@ class AppointmentController extends Controller
      */
     public function show(Appointment $appointment): JsonResponse
     {
-        $appointment->load(['client', 'nurses', 'patients', 'patients.conditions']);
+        $appointment->load(['client', 'nurses', 'patients', 'patients.conditions', 'comments']);
         return response()->json($appointment);
     }
 
@@ -147,6 +147,12 @@ class AppointmentController extends Controller
             'patients_ids' => 'array|min:1|nullable',
             'patients_ids.*' => 'bail|string|uuid|exists:patients,id',
         ]);
+
+        if ($appointment->status !== AppointmentStatus::Pending) {
+            return response()->json([
+                'message' => "this appointment can't be updated",
+            ], 406);
+        }
 
         $existsShockingAppointments = Appointment::whereHas('nurses', function (Builder $query) use ($request, $appointment) {
             $startDateTime = $request->start_datetime ?? $appointment->start_datetime;

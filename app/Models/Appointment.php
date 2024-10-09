@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Appointment extends Model
 {
@@ -20,8 +21,8 @@ class Appointment extends Model
     ];
 
     protected $casts = [
-        'start_datetime' => 'datetime',
-        'end_datetime' => 'datetime',
+        'start_datetime' => 'datetime:Y-m-d\\TH:i:s',
+        'end_datetime' => 'datetime:Y-m-d\\TH:i:s',
         'status' => AppointmentStatus::class,
     ];
 
@@ -38,5 +39,10 @@ class Appointment extends Model
     public function patients(): BelongsToMany
     {
         return $this->belongsToMany(Patient::class)->using(AppointmentPatient::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
     }
 }
