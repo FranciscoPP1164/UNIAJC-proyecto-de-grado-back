@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -19,7 +20,7 @@ class AuthController extends Controller
             'password' => 'bail|string|required',
         ]);
 
-        $user = User::firstWhere('name', $request->name);
+        $user = User::firstWhere(DB::raw('BINARY `name`'), $request->name);
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->noContent(401);
