@@ -50,7 +50,7 @@ class ClientController extends Controller
 
         $createdClient = Client::create($validatedRequestBody);
 
-        return response()->json($createdClient);
+        return response()->json($createdClient, 201);
 
     }
 

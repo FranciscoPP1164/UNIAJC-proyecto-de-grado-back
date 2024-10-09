@@ -47,7 +47,7 @@ class UserController extends Controller
 
         Mail::to($createdUser->email)->send(new CreatedAccountNotification($createdUser));
 
-        return response()->json($createdUser);
+        return response()->json($createdUser, 201);
     }
 
     /**

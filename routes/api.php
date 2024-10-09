@@ -39,7 +39,12 @@ Route::middleware(IsAdminUserMiddleware::class)->group(function () {
     });
 });
 
-Route::apiResource('appointments', AppointmentController::class);
+Route::name('appointments.')->prefix('/appointments/{appointment}')->controller(AppointmentController::class)->group(function () {
+    Route::post('/start', 'start')->name('start');
+    Route::post('/cancel', 'cancel')->name('cancel');
+    Route::post('/end', 'end')->name('end');
+});
+Route::apiResource('appointments', AppointmentController::class)->except('destroy');
 
 Route::fallback(function () {
     return response()->noContent(404);

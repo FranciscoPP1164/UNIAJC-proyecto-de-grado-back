@@ -47,7 +47,7 @@ class PatientController extends Controller
 
         $createdPatient = Patient::create($validatedRequestBody);
 
-        return response()->json($createdPatient);
+        return response()->json($createdPatient, 201);
     }
 
     /**

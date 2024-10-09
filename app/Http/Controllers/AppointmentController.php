@@ -9,7 +9,6 @@ use App\Models\Patient;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class AppointmentController extends Controller
 {
@@ -65,7 +64,6 @@ class AppointmentController extends Controller
             'text_color' => 'bail|hex_color|required',
             'start_datetime' => 'bail|string|date|date_format:Y-m-d\\TH:i:s|required',
             'end_datetime' => 'bail|string|date|date_format:Y-m-d\\TH:i:s|required',
-            'status' => ['bail', 'nullable', Rule::enum(AppointmentStatus::class)],
 
             'client_id' => 'bail|string|required|uuid|exists:clients,id',
 
@@ -86,10 +84,14 @@ class AppointmentController extends Controller
         ]);
 
         $existsShockingAppointments = Appointment::whereHas('nurses', function (Builder $query) use ($request) {
+            $startDateTime = $request->start_datetime;
+            $endDateTime = $request->end_datetime;
+            $nursesIDS = $request->nurses_ids;
+
             $query->
-                whereBetween('appointments.start_datetime', [$request->start_datetime, $request->end_datetime])->whereIn('nurses.id', $request->nurses_ids)->
-                orWhereBetween('appointments.end_datetime', [$request->start_datetime, $request->end_datetime])->whereIn('nurses.id', $request->nurses_ids)->
-                orWhere('appointments.start_datetime', '<', $request->start_datetime)->where('appointments.end_datetime', '>', $request->end_datetime)->whereIn('nurses.id', $request->nurses_ids);
+                whereBetween('appointments.start_datetime', [$startDateTime, $endDateTime])->whereIn('nurses.id', $nursesIDS)->
+                orWhereBetween('appointments.end_datetime', [$startDateTime, $endDateTime])->whereIn('nurses.id', $nursesIDS)->
+                orWhere('appointments.start_datetime', '<', $startDateTime)->where('appointments.end_datetime', '>', $endDateTime)->whereIn('nurses.id', $nursesIDS);
         })->exists();
 
         if ($existsShockingAppointments) {
@@ -99,7 +101,7 @@ class AppointmentController extends Controller
         }
 
         $client = Client::find($request->client_id);
-        $createdAppointment = $client->appointments()->create($request->only(['tittle', 'description', 'color', 'text_color', 'start_datetime', 'end_datetime', 'status']));
+        $createdAppointment = $client->appointments()->create($request->only(['tittle', 'description', 'color', 'text_color', 'start_datetime', 'end_datetime']));
 
         if ($request->patients) {
             $storedPatientsIDS = $this->storePatients($request->patients);
@@ -114,7 +116,7 @@ class AppointmentController extends Controller
 
         $createdAppointment->load(['client', 'nurses', 'patients', 'patients.conditions']);
 
-        return response()->json($createdAppointment);
+        return response()->json($createdAppointment, 201);
     }
 
     /**
@@ -131,14 +133,91 @@ class AppointmentController extends Controller
      */
     public function update(Request $request, Appointment $appointment): JsonResponse
     {
-        //
+        $request->validate([
+            'tittle' => 'bail|string|nullable',
+            'description' => 'bail|string|nullable',
+            'color' => 'bail|hex_color|nullable',
+            'text_color' => 'bail|hex_color|nullable',
+            'start_datetime' => 'bail|string|date|date_format:Y-m-d\\TH:i:s|nullable',
+            'end_datetime' => 'bail|string|date|date_format:Y-m-d\\TH:i:s|nullable',
+
+            'nurses_ids' => 'array|min:1|nullable',
+            'nurses_ids.*' => 'bail|string|uuid|exists:nurses,id',
+
+            'patients_ids' => 'array|min:1|nullable',
+            'patients_ids.*' => 'bail|string|uuid|exists:patients,id',
+        ]);
+
+        $existsShockingAppointments = Appointment::whereHas('nurses', function (Builder $query) use ($request, $appointment) {
+            $startDateTime = $request->start_datetime ?? $appointment->start_datetime;
+            $endDateTime = $request->end_datetime ?? $appointment->end_datetime;
+            $appointmentID = $appointment->id;
+            $nursesIDS = $request->nurses_ids ?? [];
+
+            $query->
+                whereBetween('appointments.start_datetime', [$startDateTime, $endDateTime])->whereNot('appointments.id', $appointmentID)->whereIn('nurses.id', $nursesIDS)->
+                orWhereBetween('appointments.end_datetime', [$startDateTime, $endDateTime])->whereNot('appointments.id', $appointmentID)->whereIn('nurses.id', $nursesIDS)->
+                orWhere('appointments.start_datetime', '<', $startDateTime)->where('appointments.end_datetime', '>', $endDateTime)->whereNot('appointments.id', $appointmentID)->whereIn('nurses.id', $nursesIDS);
+        })->exists();
+
+        if ($existsShockingAppointments) {
+            return response()->json([
+                'message' => 'There is one or more appointments that interfere with the specified date or time',
+            ], 406);
+        }
+
+        $appointment->update($request->only(['tittle', 'description', 'color', 'text_color', 'start_datetime', 'end_datetime']));
+
+        if ($request->nurses_ids) {
+            $appointment->nurses()->detach();
+            $appointment->nurses()->attach($request->nurses_ids);
+        }
+
+        if ($request->patients_ids) {
+            $appointment->patients()->detach();
+            $appointment->patients()->attach($request->patients_ids);
+        }
+
+        $appointment->load(['client', 'nurses', 'patients', 'patients.conditions']);
+        return response()->json($appointment);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Appointment $appointment): JsonResponse
+    public function start(Appointment $appointment): JsonResponse
     {
-        //
+        if ($appointment->status !== AppointmentStatus::Pending) {
+            return response()->json([
+                'message' => "this appointment can't be started",
+            ], 406);
+        }
+
+        $appointment->update(['status' => AppointmentStatus::Started]);
+
+        return response()->json($appointment);
+    }
+
+    public function cancel(Appointment $appointment): JsonResponse
+    {
+        if ($appointment->status === AppointmentStatus::Canceled || $appointment->status === AppointmentStatus::Ended) {
+            return response()->json([
+                'message' => "this appointment can't be canceled",
+            ], 406);
+        }
+
+        $appointment->update(['status' => AppointmentStatus::Canceled]);
+
+        return response()->json($appointment);
+    }
+
+    public function end(Appointment $appointment): JsonResponse
+    {
+        if ($appointment->status !== AppointmentStatus::Started) {
+            return response()->json([
+                'message' => "this appointment can't be ended",
+            ], 406);
+        }
+
+        $appointment->update(['status' => AppointmentStatus::Ended]);
+
+        return response()->json($appointment);
     }
 }

@@ -52,7 +52,7 @@ class NurseController extends Controller
 
         $createdNurse = Nurse::create($validatedRequestBody);
 
-        return response()->json($createdNurse);
+        return response()->json($createdNurse, 201);
     }
 
     /**

@@ -20,7 +20,7 @@ class ConditionController extends Controller
 
         $createdCondition = $patient->conditions()->create($validatedRequestBody);
 
-        return response()->json($createdCondition);
+        return response()->json($createdCondition, 201);
     }
 
     /**
