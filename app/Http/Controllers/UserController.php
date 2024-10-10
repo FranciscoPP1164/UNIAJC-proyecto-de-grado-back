@@ -38,7 +38,7 @@ class UserController extends Controller
     {
         $validatedRequestBody = $request->validate([
             'name' => 'bail|string|required',
-            'email' => 'bail|email|required',
+            'email' => 'bail|email|required|unique:users,email',
             'type' => ['bail', 'required', Rule::enum(UserType::class)],
             'status' => ['bail', 'nullable', Rule::enum(Status::class)],
         ]);
@@ -64,9 +64,9 @@ class UserController extends Controller
     public function update(Request $request, User $user): JsonResponse
     {
         $validatedRequestBody = $request->validate([
-            'name' => 'bail|string|required',
-            'email' => 'bail|email|required',
-            'type' => ['bail', 'required', Rule::enum(UserType::class)],
+            'name' => 'bail|string|nullable',
+            'email' => 'bail|email|nullable',
+            'type' => ['bail', 'nullable', Rule::enum(UserType::class)],
             'status' => ['bail', 'nullable', Rule::enum(Status::class)],
         ]);
 
