@@ -38,10 +38,14 @@ Route::middleware(IsAdminUserMiddleware::class)->group(function () {
     });
 });
 
-Route::name('appointments.')->prefix('/appointments/{appointment}')->controller(AppointmentController::class)->group(function () {
-    Route::post('/start', 'start')->name('start');
-    Route::post('/cancel', 'cancel')->name('cancel');
-    Route::post('/end', 'end')->name('end');
+Route::name('appointments.')->prefix('/appointments')->controller(AppointmentController::class)->group(function () {
+    Route::get('/filters', 'indexWithFilters')->name('filters');
+
+    Route::prefix('/{appointment}')->group(function () {
+        Route::post('/start', 'start')->name('start');
+        Route::post('/cancel', 'cancel')->name('cancel');
+        Route::post('/end', 'end')->name('end');
+    });
 });
 Route::apiResource('appointments', AppointmentController::class)->except('destroy');
 

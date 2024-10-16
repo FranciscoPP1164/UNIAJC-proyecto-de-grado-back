@@ -9,6 +9,7 @@ use App\Models\Patient;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AppointmentController extends Controller
 {
@@ -19,6 +20,51 @@ class AppointmentController extends Controller
     {
         $rowsPerPage = (int) $request->query('rowsPerPage') ?? 10;
         $appointments = Appointment::simplePaginate($rowsPerPage);
+        $numberOfRows = count($appointments);
+
+        return response()->json([
+            'current_page' => $appointments->currentPage(),
+            'rowsPerPage' => $rowsPerPage,
+            'count' => $numberOfRows,
+            'data' => $appointments->items(),
+        ]);
+    }
+
+    private function addWhereClausuleToBuilderWithQueryString(string $query, string $value, Builder $queryBuilder)
+    {
+        $query = Str::snake($query);
+
+        switch ($query) {
+            case 'start_datetime':
+                $queryBuilder->where($query, '>=', $value);
+                break;
+
+            case 'end_datetime':
+                $queryBuilder->where($query, '<=', $value);
+                break;
+
+            case 'status':
+                $queryBuilder->where($query, AppointmentStatus::from($value));
+                break;
+
+            default:
+                # code...
+                break;
+        }
+    }
+
+    public function indexWithFilters(Request $request): JsonResponse
+    {
+        $rowsPerPage = (int) $request->query('rowsPerPage') ?? 10;
+        $queries = $request->query;
+
+        $appointments = Appointment::query();
+
+        foreach ($queries as $query => $value) {
+            $this->addWhereClausuleToBuilderWithQueryString($query, $value, $appointments);
+        }
+
+        $appointments = $appointments->simplePaginate($rowsPerPage);
         $numberOfRows = count($appointments);
 
         return response()->json([
