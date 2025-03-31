@@ -21,7 +21,7 @@ Route::name('auth.')->prefix('/auth')->controller(AuthController::class)->group(
 });
 
 Route::middleware(IsAdminUserMiddleware::class)->group(function () {
-    Route::softDeletes('users', UserController::class);
+    // Route::softDeletes('users', UserController::class);
     Route::apiResource('users', UserController::class);
 
     Route::softDeletes('nurses', NurseController::class);

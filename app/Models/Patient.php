@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -13,7 +12,7 @@ class Patient extends Model
 {
     use SoftDeletes, HasFactory, HasUuids;
 
-    protected $fillable = ['name', 'age', 'direction', 'document_identification'];
+    protected $fillable = ['name', 'birthdate', 'direction', 'document_identification'];
 
     protected $hidden = ['pivot'];
 

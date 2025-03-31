@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Patient;
@@ -65,7 +64,7 @@ class PatientController extends Controller
     {
         $validatedRequestBody = $request->validate([
             'name' => 'bail|string|nullable',
-            'age' => 'bail|string|numeric|nullable',
+            'age' => 'bail|numeric|nullable',
             'direction' => 'bail|string|nullable',
             'document_identification' => 'bail|string|numeric|nullable',
         ]);
@@ -85,7 +84,7 @@ class PatientController extends Controller
 
     public function restore(Patient $patient): JsonResponse
     {
-        if (!$patient->trashed()) {
+        if (! $patient->trashed()) {
             return response()->json(null, 406);
         }
 
@@ -95,11 +94,26 @@ class PatientController extends Controller
 
     public function destroyPermanently(Patient $patient): JsonResponse
     {
-        if (!$patient->trashed()) {
+        if (! $patient->trashed()) {
             return response()->json(null, 406);
         }
 
         $patient->forceDelete();
         return response()->json($patient);
+    }
+
+    public function trashed(Request $request): JsonResponse
+    {
+        $rowsPerPage = (int) $request->rowsPerPage ?? 10;
+        $patients = Patient::onlyTrashed()->simplePaginate($rowsPerPage, ['id', 'name', 'document_identification']);
+
+        $numberOfRows = count($patients->items());
+
+        return response()->json([
+            'current_page' => $patients->currentPage(),
+            'rowsPerPage' => $patients->perPage(),
+            'count' => $numberOfRows,
+            'data' => $patients->items(),
+        ]);
     }
 }

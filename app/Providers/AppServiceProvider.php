@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Providers;
 
 use App\Http\Controllers\Controller;
@@ -28,11 +27,11 @@ class AppServiceProvider extends ServiceProvider
         Route::macro('softDeletes', function (string $name, $controller) {
             $singularName = substr($name, 0, -1);
 
-            Route::name("{$name}.")->prefix("/{$name}/{{$singularName}}")->controller($controller)->group(function () {
-                Route::post('/restore', 'restore')->withTrashed()->name('restore');
-                Route::delete('/permanently', 'destroyPermanently')->withTrashed()->name('destroy.permanently');
+            Route::name("{$name}.")->prefix("/{$name}")->controller($controller)->group(function () use ($singularName) {
+                Route::get('/trashed', 'trashed')->name('trashed');
+                Route::post("/{{$singularName}}/restore", 'restore')->withTrashed()->name('restore');
+                Route::delete("/{{$singularName}}/permanently", 'destroyPermanently')->withTrashed()->name('destroy.permanently');
             });
-
         });
     }
 }

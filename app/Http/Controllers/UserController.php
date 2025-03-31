@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Enums\Status;
@@ -82,25 +81,5 @@ class UserController extends Controller
         $user->delete();
         return response()->json($user);
 
-    }
-
-    public function restore(User $user): JsonResponse
-    {
-        if (!$user->trashed()) {
-            return response()->json(null, 406);
-        }
-
-        $user->restore();
-        return response()->json($user);
-    }
-
-    public function destroyPermanently(User $user): JsonResponse
-    {
-        if (!$user->trashed()) {
-            return response()->json(null, 406);
-        }
-
-        $user->forceDelete();
-        return response()->json($user);
     }
 }
