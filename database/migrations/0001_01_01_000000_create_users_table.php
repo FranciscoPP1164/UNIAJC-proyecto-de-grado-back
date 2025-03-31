@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->string('email')->unique();
             $table->string('password')->nullable();
-            $table->enum('type', ['nurse', 'admin']);
+            $table->enum('type', ['root', 'nurse', 'admin']);
             $table->enum('status', ['inactive', 'active'])->default('active');
             $table->rememberToken();
             $table->softDeletes();

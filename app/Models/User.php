@@ -56,6 +56,11 @@ class User extends Authenticatable
         return Attribute::make();
     }
 
+    public function isRoot(): bool
+    {
+        return $this->type === UserType::Root;
+    }
+
     public function renovateVerificationToken(): string
     {
         $verificationToken = Random::generate(32);

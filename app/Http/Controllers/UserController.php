@@ -7,6 +7,7 @@ use App\Mail\CreatedAccountNotification;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
@@ -60,8 +61,12 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user): JsonResponse
+    public function update(Request $request, User $user): Response | JsonResponse
     {
+        if ($user->isRoot()) {
+            return response()->noContent(422);
+        }
+
         $validatedRequestBody = $request->validate([
             'name' => 'bail|string|nullable',
             'email' => 'bail|email|nullable',
@@ -76,8 +81,12 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user): JsonResponse
+    public function destroy(User $user): Response | JsonResponse
     {
+        if ($user->isRoot()) {
+            return response()->noContent(422);
+        }
+
         $user->delete();
         return response()->json($user);
 

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Enums\UserType;
@@ -22,7 +21,7 @@ class AuthController extends Controller
 
         $user = User::firstWhere(DB::raw('BINARY `name`'), $request->name);
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->noContent(401);
         }
 
@@ -44,7 +43,7 @@ class AuthController extends Controller
             return response()->noContent(406);
         }
 
-        $filteredRequestBody['type'] = UserType::Admin;
+        $filteredRequestBody['type'] = UserType::Root;
         $newUser = User::create($filteredRequestBody);
 
         return response()->json($newUser, 201);
@@ -55,7 +54,7 @@ class AuthController extends Controller
         $verificationToken = $request->verificationToken;
         $isVerifiedToken = $user->verifyVerificationToken($verificationToken);
 
-        if (!$isVerifiedToken) {
+        if (! $isVerifiedToken) {
             return response()->noContent(401);
         }
 
