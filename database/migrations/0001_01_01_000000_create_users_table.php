@@ -19,7 +19,6 @@ return new class extends Migration
             $table->enum('type', ['root', 'nurse', 'admin']);
             $table->enum('status', ['inactive', 'active'])->default('active');
             $table->rememberToken();
-            $table->softDeletes();
             $table->timestamps();
         });
 

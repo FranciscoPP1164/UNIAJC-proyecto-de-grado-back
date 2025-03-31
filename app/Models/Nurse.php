@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use App\Enums\Genre;
@@ -12,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Nurse extends Model
 {
-    use SoftDeletes, HasFactory, HasUuids;
+    use SoftDeletes, HasFactory, HasUuids, SoftDeletes;
 
     protected $fillable = ['name', 'genre', 'email', 'phone', 'document_identification', 'status'];
 

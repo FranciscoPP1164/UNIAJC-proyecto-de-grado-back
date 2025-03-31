@@ -19,7 +19,7 @@ class CreatedAccountNotification extends Mailable
     public function __construct(private User $user)
     {
         $verificationToken = $user->renovateVerificationToken();
-        $this->route = config('app.front_url') . '/register?user=' . $user->id . '&verificationToken=' . $verificationToken;
+        $this->route = config('app.front_url') . '/auth/register?user=' . $user->id . '&verificationToken=' . $verificationToken;
     }
 
     /**

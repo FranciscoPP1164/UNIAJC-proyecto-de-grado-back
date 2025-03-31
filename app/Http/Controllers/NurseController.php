@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Enums\Genre;
@@ -92,7 +91,7 @@ class NurseController extends Controller
 
     public function restore(Nurse $nurse): JsonResponse
     {
-        if (!$nurse->trashed()) {
+        if (! $nurse->trashed()) {
             return response()->json(null, 406);
         }
 
@@ -102,11 +101,26 @@ class NurseController extends Controller
 
     public function destroyPermanently(Nurse $nurse): JsonResponse
     {
-        if (!$nurse->trashed()) {
+        if (! $nurse->trashed()) {
             return response()->json(null, 406);
         }
 
         $nurse->forceDelete();
         return response()->json($nurse);
+    }
+
+    public function trashed(Request $request): JsonResponse
+    {
+        $rowsPerPage = (int) $request->rowsPerPage ?? 10;
+        $nurses = Nurse::onlyTrashed()->simplePaginate($rowsPerPage, ['id', 'name', 'document_identification']);
+
+        $numberOfRows = count($nurses->items());
+
+        return response()->json([
+            'current_page' => $nurses->currentPage(),
+            'rowsPerPage' => $nurses->perPage(),
+            'count' => $numberOfRows,
+            'data' => $nurses->items(),
+        ]);
     }
 }
