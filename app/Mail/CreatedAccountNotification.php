@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Mail;
 
 use App\Models\User;
@@ -12,15 +11,15 @@ use Illuminate\Queue\SerializesModels;
 class CreatedAccountNotification extends Mailable
 {
     use Queueable, SerializesModels;
-
-    public string $verificationToken;
+    public string $route;
 
     /**
      * Create a new message instance.
      */
     public function __construct(private User $user)
     {
-        $this->verificationToken = $user->renovateVerificationToken();
+        $verificationToken = $user->renovateVerificationToken();
+        $this->route = config('app.front_url') . '/register?user=' . $user->id . '&verificationToken=' . $verificationToken;
     }
 
     /**
@@ -42,7 +41,7 @@ class CreatedAccountNotification extends Mailable
             view: 'emails.created-account-notification',
             with: [
                 'user' => $this->user,
-                'token' => $this->verificationToken,
+                'route' => $this->route,
             ]
         );
     }

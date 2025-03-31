@@ -1,12 +1,9 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Enums\Status;
 use App\Models\Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class ClientController extends Controller
 {
@@ -45,13 +42,11 @@ class ClientController extends Controller
             'email' => 'bail|email|required',
             'phone' => 'bail|string|numeric|required',
             'document_identification' => 'bail|string|numeric|required|unique:nurses',
-            'status' => ['bail', 'nullable', Rule::enum(Status::class)],
         ]);
 
         $createdClient = Client::create($validatedRequestBody);
 
         return response()->json($createdClient, 201);
-
     }
 
     /**
@@ -72,7 +67,6 @@ class ClientController extends Controller
             'email' => 'bail|email|nullable',
             'phone' => 'bail|string|numeric|nullable',
             'document_identification' => 'bail|string|numeric|nullable',
-            'status' => ['bail', 'nullable', Rule::enum(Status::class)],
         ]);
 
         $client->update($validatedRequestBody);
@@ -90,7 +84,7 @@ class ClientController extends Controller
 
     public function restore(Client $client): JsonResponse
     {
-        if (!$client->trashed()) {
+        if (! $client->trashed()) {
             return response()->json(null, 406);
         }
 
@@ -100,11 +94,26 @@ class ClientController extends Controller
 
     public function destroyPermanently(Client $client): JsonResponse
     {
-        if (!$client->trashed()) {
+        if (! $client->trashed()) {
             return response()->json(null, 406);
         }
 
         $client->forceDelete();
         return response()->json($client);
+    }
+
+    public function trashed(Request $request): JsonResponse
+    {
+        $rowsPerPage = (int) $request->rowsPerPage ?? 10;
+        $patients = Client::onlyTrashed()->simplePaginate($rowsPerPage, ['id', 'name', 'document_identification']);
+
+        $numberOfRows = count($patients->items());
+
+        return response()->json([
+            'current_page' => $patients->currentPage(),
+            'rowsPerPage' => $patients->perPage(),
+            'count' => $numberOfRows,
+            'data' => $patients->items(),
+        ]);
     }
 }

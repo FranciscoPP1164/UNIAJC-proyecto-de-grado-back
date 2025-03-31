@@ -5,11 +5,9 @@
         <p>Su cuenta en enfercuidarte cronogramas ha sido activada.</p>
         <p>
             Para continuar con su proceso de registro, haga click
-            <a href="{{route('auth.register', ['user' => $user, 'verificationToken' => $token])}}">
+            <a href="{{$route}}">
                 aquí
             </a>
-            <p>{{$user->id}}</p>
-            <p>{{$token}}</p>
         </p>
     </body>
 </html>

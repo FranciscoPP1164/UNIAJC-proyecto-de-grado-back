@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Enums\Status;
 use App\Enums\UserType;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -63,7 +64,7 @@ class AuthController extends Controller
             'confirm_password' => ['bail', 'string', 'required', 'same:password'],
         ]);
 
-        $user->update(['password' => $request->password]);
+        $user->update(['status' => Status::Active, 'password' => $request->password]);
         $user->verificationToken()->delete();
 
         return response()->json($user->withoutRelations());

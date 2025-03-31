@@ -100,7 +100,7 @@ return [
     'key' => env('APP_KEY'),
 
     'previous_keys' => [
-        ...array_filter(
+         ...array_filter(
             explode(',', env('APP_PREVIOUS_KEYS', ''))
         ),
     ],
@@ -123,4 +123,5 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'front_url' => env('FRONT_URL'),
 ];

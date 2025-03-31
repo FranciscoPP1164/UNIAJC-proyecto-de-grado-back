@@ -39,7 +39,7 @@ class PatientController extends Controller
     {
         $validatedRequestBody = $request->validate([
             'name' => 'bail|string|required',
-            'age' => 'bail|string|numeric|required',
+            'birthdate' => 'bail|string|date|date_format:Y-m-d|required',
             'direction' => 'bail|string|required',
             'document_identification' => 'bail|string|numeric|required|unique:patients',
         ]);
@@ -64,7 +64,7 @@ class PatientController extends Controller
     {
         $validatedRequestBody = $request->validate([
             'name' => 'bail|string|nullable',
-            'age' => 'bail|numeric|nullable',
+            'birthdate' => 'bail|string|date|date_format:Y-m-d|nullable',
             'direction' => 'bail|string|nullable',
             'document_identification' => 'bail|string|numeric|nullable',
         ]);

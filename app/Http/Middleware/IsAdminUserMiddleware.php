@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Middleware;
 
 use App\Enums\UserType;
@@ -19,7 +18,7 @@ class IsAdminUserMiddleware
     {
         $user = Auth::user();
 
-        if ($user->type !== UserType::Admin) {
+        if ($user->type !== UserType::Admin && $user->type !== UserType::Root) {
             return response()->noContent(401);
         }
 

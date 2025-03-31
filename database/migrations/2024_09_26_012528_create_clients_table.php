@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('email');
             $table->string('phone');
             $table->string('document_identification')->unique();
-            $table->enum('status', ['inactive', 'active'])->default('active');
             $table->softDeletes();
             $table->timestamps();
         });
