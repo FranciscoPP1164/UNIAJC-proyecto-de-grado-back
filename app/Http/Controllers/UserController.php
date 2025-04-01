@@ -62,7 +62,7 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user): Response | JsonResponse
     {
-        if ($user->isRoot()) {
+        if ($user->isRoot() || ! $user->password) {
             return response()->noContent(422);
         }
 
