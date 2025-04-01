@@ -39,10 +39,10 @@ class UserController extends Controller
         $validatedRequestBody = $request->validate([
             'name' => 'bail|string|required',
             'email' => 'bail|email|required|unique:users,email',
+            'type' => ['bail', 'required', Rule::enum(UserType::class)],
         ]);
 
         $validatedRequestBody['status'] = Status::Inactive;
-        $validatedRequestBody['type'] = UserType::Admin;
         $createdUser = User::create($validatedRequestBody);
         Mail::to($createdUser->email)->send(new CreatedAccountNotification($createdUser));
 
