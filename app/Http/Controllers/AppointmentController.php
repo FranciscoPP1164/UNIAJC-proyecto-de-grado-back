@@ -1,10 +1,10 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\Client;
+use App\Models\Nurse;
 use App\Models\Patient;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -18,7 +18,8 @@ class AppointmentController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $rowsPerPage = (int) $request->query('rowsPerPage') ?? 10;
+        $rowsPerPage = (int) ($request->query('rowsPerPage') ?? 10);
+
         $appointments = Appointment::simplePaginate($rowsPerPage);
         $numberOfRows = count($appointments);
 
@@ -55,7 +56,7 @@ class AppointmentController extends Controller
 
     public function indexWithFilters(Request $request): JsonResponse
     {
-        $rowsPerPage = (int) $request->query('rowsPerPage') ?? 10;
+        $rowsPerPage = (int) ($request->query('rowsPerPage') ?? 10);
         $queries = $request->query;
 
         $appointments = Appointment::query();
@@ -73,6 +74,21 @@ class AppointmentController extends Controller
             'count' => $numberOfRows,
             'data' => $appointments->items(),
         ]);
+    }
+
+    public function indexFreeNurses(Request $request): JsonResponse
+    {
+        $startDateTime = $request->query('startDateTime');
+        $endDateTime = $request->query('endDateTime');
+
+        $freeNurses = Nurse::whereDoesntHave('appointments', function (Builder $query) use ($startDateTime, $endDateTime) {
+            $query->
+                whereBetween('start_datetime', [$startDateTime, $endDateTime])->whereNotIn('status', [AppointmentStatus::Canceled, AppointmentStatus::Ended])->
+                orWhereBetween('end_datetime', [$startDateTime, $endDateTime])->whereNotIn('status', [AppointmentStatus::Canceled, AppointmentStatus::Ended])->
+                orWhere('start_datetime', '<', $startDateTime)->where('end_datetime', '>', $endDateTime)->whereNotIn('status', [AppointmentStatus::Canceled, AppointmentStatus::Ended]);
+        })->get(['id', 'name', 'document_identification']);
+
+        return response()->json($freeNurses);
     }
 
     private function storePatients(array $patients): array
