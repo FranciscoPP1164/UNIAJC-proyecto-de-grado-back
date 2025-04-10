@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\Client;
-use App\Models\Nurse;
 use App\Models\Patient;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -19,8 +18,7 @@ class AppointmentController extends Controller
     public function index(Request $request): JsonResponse
     {
         $rowsPerPage = (int) ($request->query('rowsPerPage') ?? 10);
-
-        $appointments = Appointment::simplePaginate($rowsPerPage);
+        $appointments = Appointment::orderByDesc('start_datetime')->simplePaginate($rowsPerPage);
         $numberOfRows = count($appointments);
 
         return response()->json([
@@ -56,7 +54,6 @@ class AppointmentController extends Controller
 
     public function indexWithFilters(Request $request): JsonResponse
     {
-        $rowsPerPage = (int) ($request->query('rowsPerPage') ?? 10);
         $queries = $request->query;
 
         $appointments = Appointment::query();
@@ -65,30 +62,9 @@ class AppointmentController extends Controller
             $this->addWhereClausuleToBuilderWithQueryString($query, $value, $appointments);
         }
 
-        $appointments = $appointments->simplePaginate($rowsPerPage);
-        $numberOfRows = count($appointments);
+        $appointments = $appointments->get();
 
-        return response()->json([
-            'current_page' => $appointments->currentPage(),
-            'rowsPerPage' => $rowsPerPage,
-            'count' => $numberOfRows,
-            'data' => $appointments->items(),
-        ]);
-    }
-
-    public function indexFreeNurses(Request $request): JsonResponse
-    {
-        $startDateTime = $request->query('startDateTime');
-        $endDateTime = $request->query('endDateTime');
-
-        $freeNurses = Nurse::whereDoesntHave('appointments', function (Builder $query) use ($startDateTime, $endDateTime) {
-            $query->
-                whereBetween('start_datetime', [$startDateTime, $endDateTime])->whereNotIn('status', [AppointmentStatus::Canceled, AppointmentStatus::Ended])->
-                orWhereBetween('end_datetime', [$startDateTime, $endDateTime])->whereNotIn('status', [AppointmentStatus::Canceled, AppointmentStatus::Ended])->
-                orWhere('start_datetime', '<', $startDateTime)->where('end_datetime', '>', $endDateTime)->whereNotIn('status', [AppointmentStatus::Canceled, AppointmentStatus::Ended]);
-        })->get(['id', 'name', 'document_identification']);
-
-        return response()->json($freeNurses);
+        return response()->json($appointments);
     }
 
     private function storePatients(array $patients): array
@@ -122,10 +98,8 @@ class AppointmentController extends Controller
         $request->validate([
             'tittle' => 'bail|string|required',
             'description' => 'bail|string|required',
-            'color' => 'bail|hex_color|required',
-            'text_color' => 'bail|hex_color|required',
-            'start_datetime' => 'bail|string|date|date_format:Y-m-d\\TH:i:s|required',
-            'end_datetime' => 'bail|string|date|date_format:Y-m-d\\TH:i:s|required',
+            'start_datetime' => 'bail|string|date|date_format:Y-m-d\\TH:i|required',
+            'end_datetime' => 'bail|string|date|after:start_datetime|date_format:Y-m-d\\TH:i|required',
 
             'client_id' => 'bail|string|required|uuid|exists:clients,id',
 
@@ -163,7 +137,7 @@ class AppointmentController extends Controller
         }
 
         $client = Client::find($request->client_id);
-        $createdAppointment = $client->appointments()->create($request->only(['tittle', 'description', 'color', 'text_color', 'start_datetime', 'end_datetime']));
+        $createdAppointment = $client->appointments()->create($request->only(['tittle', 'description', 'start_datetime', 'end_datetime']));
 
         if ($request->patients) {
             $storedPatientsIDS = $this->storePatients($request->patients);
@@ -198,10 +172,8 @@ class AppointmentController extends Controller
         $request->validate([
             'tittle' => 'bail|string|nullable',
             'description' => 'bail|string|nullable',
-            'color' => 'bail|hex_color|nullable',
-            'text_color' => 'bail|hex_color|nullable',
-            'start_datetime' => 'bail|string|date|date_format:Y-m-d\\TH:i:s|nullable',
-            'end_datetime' => 'bail|string|date|date_format:Y-m-d\\TH:i:s|nullable',
+            'start_datetime' => 'bail|string|date|date_format:Y-m-d\\TH:i|nullable',
+            'end_datetime' => 'bail|string|date|date_format:Y-m-d\\TH:i|nullable',
 
             'nurses_ids' => 'array|min:1|nullable',
             'nurses_ids.*' => 'bail|string|uuid|exists:nurses,id',
@@ -234,7 +206,7 @@ class AppointmentController extends Controller
             ], 406);
         }
 
-        $appointment->update($request->only(['tittle', 'description', 'color', 'text_color', 'start_datetime', 'end_datetime']));
+        $appointment->update($request->only(['tittle', 'description', 'start_datetime', 'end_datetime']));
 
         if ($request->nurses_ids) {
             $appointment->nurses()->detach();

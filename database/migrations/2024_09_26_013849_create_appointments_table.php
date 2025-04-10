@@ -15,8 +15,6 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('tittle');
             $table->text('description');
-            $table->string('color', 7);
-            $table->string('text_color', 7);
             $table->dateTime('start_datetime');
             $table->dateTime('end_datetime');
             $table->enum('status', ['pending', 'started', 'canceled', 'ended'])->default('pending');

@@ -1,9 +1,11 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Enums\AppointmentStatus;
 use App\Enums\Genre;
 use App\Enums\Status;
 use App\Models\Nurse;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -60,6 +62,21 @@ class NurseController extends Controller
     public function show(Nurse $nurse): JsonResponse
     {
         return response()->json($nurse);
+    }
+
+    public function indexFreeNurses(Request $request): JsonResponse
+    {
+        $startDateTime = $request->query('startDateTime');
+        $endDateTime = $request->query('endDateTime');
+
+        $freeNurses = Nurse::whereDoesntHave('appointments', function (Builder $query) use ($startDateTime, $endDateTime) {
+            $query->
+                whereBetween('start_datetime', [$startDateTime, $endDateTime])->whereNotIn('status', [AppointmentStatus::Canceled, AppointmentStatus::Ended])->
+                orWhereBetween('end_datetime', [$startDateTime, $endDateTime])->whereNotIn('status', [AppointmentStatus::Canceled, AppointmentStatus::Ended])->
+                orWhere('start_datetime', '<', $startDateTime)->where('end_datetime', '>', $endDateTime)->whereNotIn('status', [AppointmentStatus::Canceled, AppointmentStatus::Ended]);
+        })->get(['id', 'name', 'document_identification']);
+
+        return response()->json($freeNurses);
     }
 
     /**

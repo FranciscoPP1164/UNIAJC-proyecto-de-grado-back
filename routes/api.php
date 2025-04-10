@@ -24,6 +24,7 @@ Route::middleware(IsAdminUserMiddleware::class)->group(function () {
     // Route::softDeletes('users', UserController::class);
     Route::apiResource('users', UserController::class);
 
+    Route::get('/nurses/frees', [NurseController::class, 'indexFreeNurses'])->name('frees');
     Route::softDeletes('nurses', NurseController::class);
     Route::apiResource('nurses', NurseController::class);
 
@@ -40,7 +41,6 @@ Route::middleware(IsAdminUserMiddleware::class)->group(function () {
 
 Route::name('appointments.')->prefix('/appointments')->controller(AppointmentController::class)->group(function () {
     Route::get('/filters', 'indexWithFilters')->name('filters');
-    Route::get('/freeNurses', 'indexFreeNurses')->name('filters');
 
     Route::prefix('/{appointment}')->group(function () {
         Route::post('/start', 'start')->name('start');
