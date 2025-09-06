@@ -96,7 +96,7 @@ class AppointmentController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'tittle' => 'bail|string|required',
+            'title' => 'bail|string|required',
             'description' => 'bail|string|required',
             'start_datetime' => 'bail|string|date|date_format:Y-m-d\\TH:i|required',
             'end_datetime' => 'bail|string|date|after:start_datetime|date_format:Y-m-d\\TH:i|required',
@@ -137,7 +137,7 @@ class AppointmentController extends Controller
         }
 
         $client = Client::find($request->client_id);
-        $createdAppointment = $client->appointments()->create($request->only(['tittle', 'description', 'start_datetime', 'end_datetime']));
+        $createdAppointment = $client->appointments()->create($request->only(['title', 'description', 'start_datetime', 'end_datetime']));
 
         if ($request->patients) {
             $storedPatientsIDS = $this->storePatients($request->patients);
@@ -170,7 +170,7 @@ class AppointmentController extends Controller
     public function update(Request $request, Appointment $appointment): JsonResponse
     {
         $request->validate([
-            'tittle' => 'bail|string|nullable',
+            'title' => 'bail|string|nullable',
             'description' => 'bail|string|nullable',
             'start_datetime' => 'bail|string|date|date_format:Y-m-d\\TH:i|nullable',
             'end_datetime' => 'bail|string|date|date_format:Y-m-d\\TH:i|nullable',
@@ -206,7 +206,7 @@ class AppointmentController extends Controller
             ], 406);
         }
 
-        $appointment->update($request->only(['tittle', 'description', 'start_datetime', 'end_datetime']));
+        $appointment->update($request->only(['title', 'description', 'start_datetime', 'end_datetime']));
 
         if ($request->nurses_ids) {
             $appointment->nurses()->detach();

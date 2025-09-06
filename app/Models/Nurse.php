@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Nurse extends Model
 {
-    use SoftDeletes, HasFactory, HasUuids, SoftDeletes;
+    use SoftDeletes, HasFactory, HasUuids;
 
     protected $fillable = ['name', 'genre', 'email', 'phone', 'document_identification', 'status'];
 

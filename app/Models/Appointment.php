@@ -14,7 +14,7 @@ class Appointment extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $fillable = ['tittle', 'description', 'start_datetime', 'end_datetime', 'status'];
+    protected $fillable = ['title', 'description', 'start_datetime', 'end_datetime', 'status'];
 
     protected $attributes = [
         'status' => AppointmentStatus::Pending,

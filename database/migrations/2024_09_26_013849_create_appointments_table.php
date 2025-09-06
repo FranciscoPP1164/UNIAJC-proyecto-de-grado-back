@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('tittle');
+            $table->string('title');
             $table->text('description');
             $table->dateTime('start_datetime');
             $table->dateTime('end_datetime');
