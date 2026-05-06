@@ -17,7 +17,7 @@ class CommentController extends Controller
     {
         if ($appointment->status !== AppointmentStatus::Started) {
             return response()->json([
-                'message' => "this appointment has not been started",
+                'message' => "Esta cita no se ha iniciado",
             ], 406);
         }
 

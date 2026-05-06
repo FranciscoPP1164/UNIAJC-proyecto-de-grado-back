@@ -132,7 +132,7 @@ class AppointmentController extends Controller
 
         if ($existsShockingAppointments) {
             return response()->json([
-                'message' => 'There is one or more appointments that interfere with the specified date or time',
+                'message' => 'Hay una o más citas que interfieren con la fecha u hora especificada',
             ], 406);
         }
 
@@ -184,7 +184,7 @@ class AppointmentController extends Controller
 
         if ($appointment->status !== AppointmentStatus::Pending) {
             return response()->json([
-                'message' => "this appointment can't be updated",
+                'message' => "Esta cita no se puede actualizar",
             ], 406);
         }
 
@@ -202,7 +202,7 @@ class AppointmentController extends Controller
 
         if ($existsShockingAppointments) {
             return response()->json([
-                'message' => 'There is one or more appointments that interfere with the specified date or time',
+                'message' => 'Hay una o más citas que interfieren con la fecha u hora especificada',
             ], 406);
         }
 
@@ -226,7 +226,7 @@ class AppointmentController extends Controller
     {
         if ($appointment->status !== AppointmentStatus::Pending) {
             return response()->json([
-                'message' => "this appointment can't be started",
+                'message' => "Esta cita no se puede iniciar",
             ], 406);
         }
 
@@ -239,7 +239,7 @@ class AppointmentController extends Controller
     {
         if ($appointment->status === AppointmentStatus::Canceled || $appointment->status === AppointmentStatus::Ended) {
             return response()->json([
-                'message' => "this appointment can't be canceled",
+                'message' => "Esta cita no se puede cancelar",
             ], 406);
         }
 
@@ -252,7 +252,7 @@ class AppointmentController extends Controller
     {
         if ($appointment->status !== AppointmentStatus::Started) {
             return response()->json([
-                'message' => "this appointment can't be ended",
+                'message' => "Esta cita no se puede finalizar",
             ], 406);
         }
 
